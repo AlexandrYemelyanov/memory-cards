@@ -1,0 +1,40 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'flag-icons/css/flag-icons.min.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.card {
+    background-color: transparent;
+}
+.form-control::placeholder, .desc-text {
+    color: rgba(255, 255, 255, 0.25);
+}
+.form-select {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.form-control {
+    border-radius: 6px;
+    height: 40px;
+}
+.btn-outline-success:focus,
+.btn-outline-success:active,
+.btn-outline-success:focus-visible {
+    background-color: #0d6efd;
+    color: #ffffff;
+    border-color: #0d6efd;
+}
+#groupsNav {
+    border-color: rgba(255, 255, 255, .55);
+}
+#groupsNav a {
+    color: rgba(255, 255, 255, .55);
+    border: none !important;
+}
+#groupsNav .active, #groupsNav .nav-link:hover {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+}
+
