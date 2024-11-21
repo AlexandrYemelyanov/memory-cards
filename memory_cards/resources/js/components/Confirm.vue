@@ -3,7 +3,11 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark text-white">
                 <div class="modal-header border-bottom-0">
-                    <button type="button" class="btn-close btn-close-white" @click="closeModal" aria-label="{{ $trans.close }}"></button>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            @click="closeModal"
+                            aria-label="{{ $trans.close }}"
+                    ></button>
                 </div>
                 <div class="modal-body text-center">
                     {{ question }}{{ $trans.remove }} <span class="text-danger text-uppercase">{{ itemName }}</span> ?

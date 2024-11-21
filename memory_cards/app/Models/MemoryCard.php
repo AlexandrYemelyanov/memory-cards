@@ -10,9 +10,12 @@ class MemoryCard extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['foreign_word', 'translation', 'color', 'user_id', 'group_id'];
+    protected $fillable = [
+        'foreign_word',
+        'translation',
+        'group_id'
+    ];
 
-    // Генерация случайного цвета при создании карточки
     public static function boot()
     {
         parent::boot();
@@ -45,7 +48,7 @@ class MemoryCard extends Model
         return self::where('group_id', $group_id)->update(['group_id' => null]);
     }
 
-    public static function getCardsByGroup(int $group_id)
+    public function getCardsByGroup(int $group_id)
     {
         return self::where('group_id', $group_id)->orderByRaw('RAND()')->get();
     }
@@ -59,5 +62,15 @@ class MemoryCard extends Model
     {
         $first = self::first();
         return empty($first['group_id']) ? 0 : $first['group_id'];
+    }
+
+    public static function getCurrentGroup(int $group_id)
+    {
+        return self::getCountCardsByGroup($group_id) ? $group_id : self::getFirstGroup();
+    }
+
+    public static function removeByGroup(array $group_ids)
+    {
+        self::whereIn('group_id', $group_ids)->delete();
     }
 }

@@ -1,20 +1,38 @@
 <template>
-    <form @submit.prevent="createCard" class="row g-3 justify-content-center mt-3">
+    <form @submit.prevent="saveCard" class="row g-3 justify-content-center mt-3">
         <div class="col-auto col-xs-12">
-            <input v-model="foreignWord"
-                   type="text"
-                   class="form-control text-white bg-transparent"
-                   :placeholder="$trans.foreign_word"
-                   required
-            >
+            <div class="input-group">
+                <input v-model="foreignWord"
+                       type="text"
+                       class="form-control text-white bg-transparent"
+                       :placeholder="$trans.foreign_word"
+                       required
+                >
+                <button  @click="translateForeign()"
+                         @blur="clearMessage"
+                         class="btn btn-outline-primary"
+                         type="button"
+                >
+                    <i class="bi" :class="buttonTranslateClass"></i>
+                </button>
+            </div>
         </div>
         <div class="col-auto col-xs-12">
-            <input v-model="translation"
-                   type="text"
-                   class="form-control text-white bg-transparent"
-                   :placeholder="$trans.translate"
-                   required
-            >
+            <div class="input-group">
+                <input v-model="translation"
+                       type="text"
+                       class="form-control text-white bg-transparent"
+                       :placeholder="$trans.translate"
+                       required
+                >
+                <button @click="translateTrans()"
+                        @blur="clearMessage"
+                        class="btn btn-outline-primary"
+                        type="button"
+                >
+                    <i class="bi" :class="buttonTranslateClass"></i>
+                </button>
+            </div>
         </div>
         <div class="col-auto col-xs-12">
             <select v-model="group" class="form-control form-select text-white bg-transparent">
@@ -44,14 +62,17 @@
 </template>
 
 <script>
+
 export default {
-    props: ['card', 'groups'],
+    props: ['card', 'groups', 'currGroup'],
     data() {
         return {
             id: 0,
-            group: 0,
+            group: this.currGroup || 0,
             foreignWord: '',
             translation: '',
+            isTransIcon: true,
+            isSpinner: false,
             message: {
                 success: '',
                 error: ''
@@ -70,40 +91,76 @@ export default {
             }
         }
     },
+    computed: {
+        buttonTranslateClass() {
+            return {
+                'bi-translate': this.isTransIcon,
+                'spinner-border spinner-border-small': this.isSpinner
+            }
+        },
+    },
     methods: {
+        translateForeign() {
+            if (!this.foreignWord.length) {
+                return this.message.error = this.$trans.empty_field;
+            }
+            this.setSpinner();
+            this.$request('/cards/translate', {
+                foreign: this.foreignWord
+            }, 'post').then(response => {
+                this.message = response.message;
+                if (response.options.length) {
+                    this.translation = response.options;
+                }
+                this.removeSpinner();
+            });
+        },
+        translateTrans() {
+            if (!this.translation.length) {
+                return this.message.error = this.$trans.empty_field;
+            }
+            this.setSpinner();
+            this.$request('/cards/translate', {
+                translation: this.translation
+            }, 'post').then(response => {
+                this.message = response.message;
+                if (response.options.length) {
+                    this.foreignWord = response.options;
+                }
+                this.removeSpinner();
+            });
+        },
         loadData(card) {
             this.id = card.id || 0;
-            this.group = card.group_id || 0;
+            this.group = card.group_id || this.currGroup;
             this.foreignWord = card.foreign_word || '';
             this.translation = card.translation || '';
         },
-        async createCard() {
-            try {
-                const response = this.id ? await this.$axios.post('/cards/update', {
-                    id: this.id,
-                    foreign_word: this.foreignWord,
-                    translation: this.translation,
-                    group_id: this.group,
-                }) : await this.$axios.post('/cards/add', {
-                    foreign_word: this.foreignWord,
-                    translation: this.translation,
-                    group_id: this.group,
-                });
-                if (response.data && response.data.status && response.data.status === 200) {
-                    this.message.success = response.data.message;
-                    this.card.foreign_word = this.foreignWord;
-                    this.card.translation = this.translation;
-                    this.$emit('save', this.card);
-                } else {
-                    this.message.error = response.data.message;
-                }
-            } catch (error) {
-                this.message.error = error;
-            }
+        saveCard() {
+            this.$request('/groups/set/', {group_app: this.group}, 'post');
+
+            const data = {
+                foreign_word: this.foreignWord,
+                translation: this.translation,
+                group_id: this.group
+            };
+            const url = '/cards/' + (this.id ? 'update/' + this.id : 'add');
+            this.$request(url, data, 'post').then(response => {
+                this.message = response.message;
+                this.$request('/groups/set/', {group_qty: this.group}, 'post');
+            });
         },
         clearMessage() {
             this.message.success = '';
             this.message.error = '';
+        },
+        setSpinner() {
+            this.isTransIcon = false;
+            this.isSpinner = true;
+        },
+        removeSpinner() {
+            this.isTransIcon = true;
+            this.isSpinner = false;
         },
     }
 };

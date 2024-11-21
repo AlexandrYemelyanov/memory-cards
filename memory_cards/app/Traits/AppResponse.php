@@ -1,18 +1,19 @@
 <?php
+
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
 
-trait CardResponse
+trait AppResponse
 {
-    private function responseJson($message, $code = 200, $options = []): JsonResponse
+    protected function responseJson($message, $code = 200, $options = []): JsonResponse
     {
         $data = [
             'message' => $message,
             'status' => $code
         ];
 
-        $data = array_merge($data, $options);
+        $data = array_merge($data, ['options' => $options]);
 
         return response()->json($data);
     }

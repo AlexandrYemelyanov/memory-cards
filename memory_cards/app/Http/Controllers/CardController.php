@@ -2,76 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Helpers\AppLangHelper;
+use App\Http\Helpers\GroupsHelper;
+use App\Http\Requests\CardRequest;
+use App\Services\Contracts\TranslatorInterface;
+use App\Services\TranslatorFactory;
 use Illuminate\Http\Request;
 use App\Models\MemoryCard;
-use App\Models\Groups;
 use Illuminate\Http\JsonResponse;
-use App\Traits\CardResponse;
-use App\Http\Helpers\LangHelper as Lang;
+use App\Http\Helpers\UiLangHelper as Lang;
+use Illuminate\Support\Facades\Auth;
 
-
-class CardController extends Controller
+class CardController extends AppController
 {
-    use CardResponse;
+    protected TranslatorInterface $translator;
 
-    public function create(Request $request): JsonResponse
+    public function __construct(MemoryCard $model, CardRequest $request, TranslatorFactory $translatorFactory)
     {
-        try {
-            $validated = $request->validate([
-                'foreign_word' => 'required|string',
-                'translation' => 'required|string',
-                'group_id' => 'required|int',
-            ]);
-            MemoryCard::create($validated);
-            return $this->responseJson(Lang::get('card_saved'));
-        } catch (\Exception $e) {
-            return $this->responseJson($e->getMessage(), 500);
-        }
+        parent::__construct();
+        $this->translator = $translatorFactory->make();
+        $this->model = $model;
+        $this->request = $request;
     }
 
-    public function update(Request $request): JsonResponse
+    public function index(): mixed
     {
-        $validated = $request->validate([
-            'id' => 'required|int',
-            'foreign_word' => 'required|string',
-            'translation' => 'required|string',
-            'group_id' => 'required|int',
-        ]);
-        if (!MemoryCard::cardExist($validated['id'])) {
-            return $this->responseJson('', 500);
+        $groups_info = GroupsHelper::getGroups();
+        if (empty($groups_info['groups'])) {
+            return redirect()->route('group.index');
         }
+        $cards = $this->model->getCardsByGroup($groups_info['curr_group_id']);
 
-        MemoryCard::where('id', $validated['id'])->update($validated);
-        return $this->responseJson(Lang::get('card_updated'));
-    }
-
-    public function destroy(int $cart_id): JsonResponse
-    {
-        if (!MemoryCard::cardExist($cart_id)) {
-            return $this->responseJson('', 500);
-        }
-
-        MemoryCard::destroy($cart_id);
-        return $this->responseJson('');
-    }
-
-    public function index(Request $request): mixed
-    {
-        $cards = MemoryCard::where('group_id', $this->getCurrentGroup($request))->orderByRaw('RAND()')->get();
-        if (!$cards->count()) {
-            return redirect()->route('card.add');
-        }
         $data = [
             'cards' => $cards,
-            'groups' => Groups::getAll()
+            'groups' => $groups_info['groups'],
+            'current_lang' => AppLangHelper::getLang(),
+            'current_group' => $groups_info['curr_group_id'],
         ];
         return view('cards.show', $data);
-    }
-
-    private function getCurrentGroup(Request $request)
-    {
-        $group_cookie = (int) $request->cookie('view-group');
-        return MemoryCard::getCountCardsByGroup($group_cookie) ? $group_cookie : MemoryCard::getFirstGroup();
     }
 
     public function importCsv(Request $request): JsonResponse
@@ -79,15 +47,57 @@ class CardController extends Controller
         $file = $request->file('csv_file');
         $fileHandle = fopen($file->getPathname(), 'r');
         $cnt = 0;
+        $group_id = $request->get('group_app', 0);
         while (($row = fgetcsv($fileHandle, 1000, ',')) !== false) {
-            MemoryCard::create([
+            $this->model->create([
                 'foreign_word' => $row[0],
                 'translation' => $row[1],
-                'group_id' => 0
+                'group_id' => $group_id
             ]);
             $cnt++;
         }
         fclose($fileHandle);
         return $this->responseJson(sprintf(Lang::get('imported_qty_cards'), $cnt));
+    }
+
+    public function move(Request $request): JsonResponse
+    {
+        $group_from = (int) $request->get('from', 0);
+        $group_to = (int) $request->get('to', 0);
+        if (empty($group_from) || empty($group_to)) {
+            return $this->responseJson(Lang::get('select_group'), 500);
+        }
+        $this->model->where('group_id', $group_from)->update(['group_id' => $group_to]);
+
+        return $this->responseJson(Lang::get('saved'));
+    }
+
+    public function translate(Request $request): JsonResponse
+    {
+        if (!$this->translator->checkAccessTranslate()) {
+            return $this->responseJson(Lang::get('limit_translate'), 500);
+        }
+        $foreign = (string) $request->get('foreign', '');
+        $translation = (string) $request->get('translation', '');
+        if (empty($foreign) && empty($translation)) {
+            return $this->responseJson(Lang::get('empty_field'), 500);
+        }
+        $user_lang = Auth::user()->loc;
+        $app_lang = $this->app_lang_loc;
+        if (empty($foreign)) {
+            $text = $translation;
+            $from = $user_lang;
+            $to = $app_lang;
+        } else {
+            $text = $foreign;
+            $from = $app_lang;
+            $to = $user_lang;
+        }
+
+        return $this->responseJson(
+            '',
+            200,
+            $this->translator->translate($text, $from, $to)
+        );
     }
 }

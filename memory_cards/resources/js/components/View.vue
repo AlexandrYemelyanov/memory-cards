@@ -2,13 +2,18 @@
     <div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <select v-model="group" @change="changeGroup" class="form-control form-select text-white bg-transparent">
-                    <option value="0">{{ $trans.without_group }}</option>
-                    <option v-for="option in groups" :value="option.id">{{ option.name }}</option>
-                </select>
+                <SelectGroup :current-group="group" :groups="groups" @change="changeGroup" />
             </div>
         </div>
-        <div class="mb-3 row">
+
+        <div v-if="!cards.length" class="mb-3 row">
+            <div class="col text-center text-light fs-5">
+                {{ $trans.empty_cards_in_group }} <br><br>
+                <a href="/cards/add" class="btn btn-outline-success">{{ $trans.add }}</a>
+            </div>
+        </div>
+
+        <div v-if="cards.length" class="mb-3 row">
             <div class="col">
                 <div class="card card-body text-center text-light text-lowercase"
                      @click="flipCard"
@@ -18,23 +23,26 @@
             </div>
         </div>
 
-        <memory-card-create v-if="Object.keys(card).length"
+        <memory-card-create v-if="cards.length && Object.keys(card).length"
                             v-show="showEdit"
                             :card="card"
                             :groups="groups"
                             @save="changeDataCard"
         />
 
-        <div class="row">
+        <div v-if="cards.length" class="row">
             <div class="col">
                 <CardActionMenu
+                    @voice="playVoice"
                     @edit="editCard"
                     @confirm="openConfirm"
+                    :listenIs="voice"
                 />
             </div>
         </div>
 
         <memory-card-confirm
+            v-if="cards.length"
             :itemName="card.foreign_word || ''"
             :open="showConfirm"
             @confirm="removeCard"
@@ -44,27 +52,28 @@
 </template>
 
 <script>
+import SelectGroup from './SelectGroup.vue';
 import CardActionMenu from './ActionMenu.vue';
-import Cookies from 'js-cookie';
 
 export default {
     components: {
-        CardActionMenu
+        CardActionMenu, SelectGroup
     },
-    props: ['cards', 'groups'],
+    props: ['cards', 'groups', 'currentGroup', 'currentLang', 'voiceKey'],
     data() {
         return {
             cnt: -1,
             currentIndex: -1,
-            group: 0,
+            group: this.currentGroup || 0,
             card: {},
+            voice: '',
             showFront: true,
             showEdit: false,
             showConfirm: false,
         };
     },
     mounted() {
-        this.loadCardData();
+        this.cards.length && this.loadCard() && this.voiceLoad();
     },
     computed: {
         cardTitle() {
@@ -72,9 +81,9 @@ export default {
         }
     },
     methods: {
-        changeGroup() {
-            Cookies.set('view-group', this.group, { expires: 7 });
-            location.reload();
+        changeGroup(group) {
+            this.$request('/groups/set/', {group_app: group}, 'post').
+            then(()=>{ location.reload(); });
         },
         flipCard() {
             if (!this.showFront) {
@@ -84,10 +93,7 @@ export default {
         },
         loadCard() {
             this.card = this.nextItem();
-        },
-        async loadCardData() {
-            this.loadCard();
-            this.group = this.card.group_id;
+            return true;
         },
         nextCard() {
             this.loadCard();
@@ -98,11 +104,17 @@ export default {
             this.currentIndex = this.cnt % this.cards.length;
             return this.cards[this.currentIndex];
         },
+        playVoice() {
+            if (this.voice) {
+                responsiveVoice.speak(this.card.foreign_word, this.voice);
+            }
+        },
         editCard() {
             this.showEdit = !this.showEdit;
         },
-        async removeCard() {
-            await this.$axios.get('/cards/remove/' + this.card.id);
+        removeCard() {
+            this.$request('/cards/remove/' + this.card.id);
+            this.$request('/groups/set/', {group_qty: this.card.group_id}, 'post');
             this.cards.splice(this.currentIndex, 1);
             this.nextCard();
         },
@@ -115,6 +127,22 @@ export default {
         changeDataCard(card) {
             this.card = card;
             this.cards[this.currentIndex] = card;
+        },
+        voiceLoad() {
+            const script = document.createElement('script');
+            script.src = 'https://code.responsivevoice.org/responsivevoice.js?key=' + this.voiceKey;
+            script.async = true;
+            document.head.appendChild(script);
+            script.onload = () => {
+                let voiceList = responsiveVoice.getVoices(),
+                    that = this;
+
+                voiceList.forEach(voice => {
+                    if (voice.name.includes(that.currentLang.name)) {
+                        that.voice = voice.name;
+                    }
+                });
+            };
         },
     }
 };

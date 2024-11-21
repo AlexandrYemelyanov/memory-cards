@@ -25,16 +25,19 @@
     color: #ffffff;
     border-color: #0d6efd;
 }
-#groupsNav {
+.app-nav.nav-tabs {
     border-color: rgba(255, 255, 255, .55);
 }
-#groupsNav a {
+.app-nav.nav-tabs a {
     color: rgba(255, 255, 255, .55);
     border: none !important;
 }
-#groupsNav .active, #groupsNav .nav-link:hover {
+.app-nav.nav-tabs .active.nav-link, .app-nav.nav-tabs .nav-link:hover {
     background-color: transparent;
     color: #ffffff;
     border: none;
 }
-
+.spinner-border-small {
+    --bs-spinner-width: 1rem!important;
+    --bs-spinner-height: 1rem!important;
+}

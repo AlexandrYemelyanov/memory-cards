@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('memory_cards', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('group_id');
+            $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
             $table->string('foreign_word');
             $table->string('translation');
             $table->string('color');

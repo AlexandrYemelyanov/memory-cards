@@ -18,7 +18,11 @@
 <body style="background-color: rgb(33, 37, 41)" class="bg-dark">
 <div class="container mt-4">
     <div id="app" data-trans='{{ json_encode(trans('messages')) }}'>
-        <memory-card-menu :locale="'{{ $locale }}'" :user="{{ json_encode(Auth::user()) }}"></memory-card-menu>
+        <memory-card-menu
+            :locale="'{{ $locale }}'"
+            :user="{{ json_encode(Auth::user())}}"
+            :current-url="'{{ Request::path() }}'">
+        </memory-card-menu>
         @yield('content')
     </div>
 </div>

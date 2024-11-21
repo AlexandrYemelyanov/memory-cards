@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('lang_id')->constrained('langs')->onDelete('cascade');
             $table->string('name');
+            $table->integer('qty')->default(0);
             $table->timestamps();
         });
     }

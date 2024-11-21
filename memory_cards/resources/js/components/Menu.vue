@@ -19,21 +19,27 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/cards/add">
+                        <a :class="{'nav-link': true, 'active': currentUrl == 'cards/add'}" href="/cards/add">
                             <i class="bi bi-plus-lg"></i>
                             {{ $trans.add }}
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cards/import">
+                        <a :class="{'nav-link': true, 'active': currentUrl == 'cards/import'}" href="/cards/import">
                             <i class="bi bi-database-up"></i>
                             {{ $trans.import }}
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/groups">
+                        <a :class="{'nav-link': true, 'active': currentUrl == 'groups'}" href="/groups">
                             <i class="bi bi-collection"></i>
                             {{ $trans.groups }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a :class="{'nav-link': true, 'active': currentUrl == 'langs'}" href="/langs">
+                            <i class="bi bi-translate"></i>
+                            {{ $trans.langs }}
                         </a>
                     </li>
                 </ul>
@@ -61,22 +67,22 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="languageDropdown">
                             <li>
-                                <a class="dropdown-item" href="?lang=en">
+                                <a class="dropdown-item" href="?lang_ui=en">
                                     <span class="fi fi-gb"></span> English
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="?lang=ru">
+                                <a class="dropdown-item" href="?lang_ui=ru">
                                     <span class="fi fi-ru"></span> Русский
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="?lang=ua">
+                                <a class="dropdown-item" href="?lang_ui=ua">
                                     <span class="fi fi-ua"></span> Українська
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="?lang=cz">
+                                <a class="dropdown-item" href="?lang_ui=cz">
                                     <span class="fi fi-cz"></span> Čeština
                                 </a>
                             </li>
@@ -90,7 +96,7 @@
 
 <script>
 export default {
-    props: ['user', 'locale'],
+    props: ['user', 'locale', 'currentUrl'],
     computed: {
         currentLang() {
             const localeFlag = {
