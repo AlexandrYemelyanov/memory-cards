@@ -11,9 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->appendToGroup('web', \App\Http\Middleware\UiLocaleMiddleware::class);
-        $middleware->appendToGroup('web', \App\Http\Middleware\AppLocaleMiddleware::class);
-        $middleware->appendToGroup('web', \App\Http\Middleware\AppGroupMiddleware::class);
+        $middleware->appendToGroup('web', \App\Middleware\UiLocaleMiddleware::class);
+        $middleware->appendToGroup('web', \App\Middleware\AppLocaleMiddleware::class);
+        $middleware->appendToGroup('web', \App\Middleware\AppGroupMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

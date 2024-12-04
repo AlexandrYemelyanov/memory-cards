@@ -4,7 +4,7 @@
             <div class="col-auto col-xs-12">
                 <input v-model="newGroup"
                        type="text"
-                       class="form-control text-white bg-transparent"
+                       class="form-control text-white bg-transparent mb-3"
                        @blur="focusOut"
                        :placeholder="$trans.name_new_group"
                        required

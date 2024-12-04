@@ -1,23 +1,30 @@
 <template>
-    <select v-model="group" @change="changeGroup" class="form-control form-select text-white bg-transparent" required>
+    <select v-model="reactiveGroup" class="form-control form-select text-white bg-transparent" required>
         <option value="0">{{ $trans.without_group }}</option>
-        <option v-for="option in groups" :value="option.id">{{ option.name }} ({{ option.qty }})</option>
+        <option v-for="option in reactiveGroups" :value="option.id">{{ option.name }} ({{ option.qty }})</option>
     </select>
 </template>
 
 <script>
 export default {
-    emits: ['change'],
-    props: ['currentGroup', 'groups'],
+    emits: ['update:modelValue'],
+    props: ['modelValue', 'groups'],
     data() {
         return {
-            group: this.currentGroup || 0
+            reactiveGroup: this.modelValue || 0,
+            reactiveGroups: this.groups,
         };
     },
-    methods: {
-        changeGroup() {
-            this.$emit('change', this.group);
-        }
+    watch: {
+        modelValue(newGroup) {
+            this.reactiveGroup = newGroup;
+        },
+        reactiveGroup(newGroup) {
+            this.$emit('update:modelValue', newGroup);
+        },
+        groups(newGroups) {
+            this.reactiveGroups = newGroups;
+        },
     },
 }
 </script>

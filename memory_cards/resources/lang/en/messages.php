@@ -23,6 +23,8 @@ return [
     'import_file_desc' => 'Upload a CSV file with cards. The first column is the foreign word, the second is the translation',
     'choice_file' => 'Choose a file',
     'name_new_group' => 'New group name',
+    'card_create' => 'Create a card',
+    'import_csv' => 'Import CSV',
     'card_saved' => 'Card saved',
     'card_updated' => 'Card updated',
     'imported_qty_cards' => '%d cards imported',

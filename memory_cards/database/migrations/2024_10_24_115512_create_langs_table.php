@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('langs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('loc')->unique();
+            $table->string('loc');
             $table->string('name');
             $table->timestamps();
+
+            $table->unique(['user_id', 'loc']);
         });
     }
 

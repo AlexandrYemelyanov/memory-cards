@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Helpers\AppLangHelper;
-use App\Http\Helpers\UiLangHelper as Lang;
-use App\Services\TranslatorFactory;
+use App\Helpers\AppLangHelper;
+use App\Helpers\UiLangHelper as Lang;
 use App\Traits\AppResponse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
@@ -43,8 +42,8 @@ abstract class AppController
         if (!$model = $this->getModelById($id)) {
             return $this->responseJson('Record not found', 404);
         }
-
         $model->delete();
+
         return $this->responseJson('');
     }
 

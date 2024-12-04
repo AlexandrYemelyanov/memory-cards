@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Helpers\GroupsHelper;
+use App\Helpers\GroupsHelper;
 use App\Http\Requests\GroupRequest;
 use App\Models\Groups;
 use App\Models\Langs;
+use Illuminate\Http\JsonResponse;
 
 class GroupsController extends AppController
 {
@@ -32,5 +33,10 @@ class GroupsController extends AppController
         ];
 
         return view('cards.groups', $data);
+    }
+
+    public function getAll(): JsonResponse
+    {
+        return $this->responseJson('', 200, GroupsHelper::getGroups());
     }
 }

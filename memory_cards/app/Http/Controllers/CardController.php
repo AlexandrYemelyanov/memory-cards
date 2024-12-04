@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Helpers\AppLangHelper;
-use App\Http\Helpers\GroupsHelper;
+use App\Helpers\AppLangHelper;
+use App\Helpers\GroupsHelper;
+use App\Helpers\UiLangHelper as Lang;
+use App\Helpers\UserDataHelper;
 use App\Http\Requests\CardRequest;
+use App\Models\MemoryCard;
 use App\Services\Contracts\TranslatorInterface;
 use App\Services\TranslatorFactory;
-use Illuminate\Http\Request;
-use App\Models\MemoryCard;
 use Illuminate\Http\JsonResponse;
-use App\Http\Helpers\UiLangHelper as Lang;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class CardController extends AppController
 {
@@ -99,5 +101,17 @@ class CardController extends AppController
             200,
             $this->translator->translate($text, $from, $to)
         );
+    }
+
+    public function importUserData(): JsonResponse
+    {
+        $res = UserDataHelper::import(Auth::id());
+        return $this->responseJson('', $res ? 200 : 500);
+    }
+
+    public function exportUserData(): JsonResponse
+    {
+        $res = UserDataHelper::export(Auth::id());
+        return $this->responseJson('', $res ? 200 : 500);
     }
 }

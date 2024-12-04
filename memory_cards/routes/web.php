@@ -1,24 +1,27 @@
 <?php
 
+use App\Helpers\GroupsHelper;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\LangsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserLangController;
-
-use App\Http\Helpers\GroupsHelper;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CardController;
 
 
 // Auth
 Route::middleware('auth')->group(function () {
-    Route::get('/', [CardController::class, 'index']);
+    Route::get('/', [CardController::class, 'index'])->name('dashboard');
+    Route::get('/export', [CardController::class, 'exportUserData']);
+    Route::get('/importUser', [CardController::class, 'importUserData']);
+
 
     Route::prefix('/groups')->group(function () {
         Route::get('', [GroupsController::class, 'index'])->name('group.index');
         Route::post('/new', [GroupsController::class, 'create']);
         Route::post('/save/{group_id}', [GroupsController::class, 'update'])->where(['card_id' => '[0-9]+']);
         Route::post('/set', [GroupsController::class, 'set']);
+        Route::post('/get', [GroupsController::class, 'getAll']);
         Route::get('/remove/{group_id}', [GroupsController::class, 'destroy'])->where(['card_id' => '[0-9]+']);
         Route::post('/move', [CardController::class, 'move']);
     });

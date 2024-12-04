@@ -35,10 +35,7 @@
             </div>
         </div>
         <div class="col-auto col-xs-12">
-            <select v-model="group" class="form-control form-select text-white bg-transparent">
-                <option value="0">{{ $trans.without_group }}</option>
-                <option v-for="option in groups" :value="option.id">{{ option.name }}</option>
-            </select>
+            <SelectGroup v-model="group" :groups="reactiveGroups" />
         </div>
 
         <div class="col-auto col-xs-12 mb-3">
@@ -63,12 +60,17 @@
 
 <script>
 
+import SelectGroup from "./SelectGroup.vue";
+
 export default {
+    components: {SelectGroup},
     props: ['card', 'groups', 'currGroup'],
     data() {
         return {
             id: 0,
             group: this.currGroup || 0,
+            loadedGroup: this.currGroup || 0,
+            reactiveGroups: this.groups,
             foreignWord: '',
             translation: '',
             isTransIcon: true,
@@ -79,17 +81,17 @@ export default {
             }
         };
     },
-    emits: ['save'],
+    emits: ['save', 'changeGroups'],
     mounted() {
         this.loadData(this.card);
     },
     watch: {
-        card: {
-            immediate: true,
-            handler(newCard) {
-                this.loadData(newCard);
-            }
-        }
+        card(newCard) {
+            this.loadData(newCard);
+        },
+        groups(newGroups) {
+            this.reactiveGroups = newGroups;
+        },
     },
     computed: {
         buttonTranslateClass() {
@@ -133,21 +135,51 @@ export default {
         loadData(card) {
             this.id = card.id || 0;
             this.group = card.group_id || this.currGroup;
+            this.loadedGroup = card.group_id || 0;
             this.foreignWord = card.foreign_word || '';
             this.translation = card.translation || '';
         },
         saveCard() {
             this.$request('/groups/set/', {group_app: this.group}, 'post');
-
             const data = {
                 foreign_word: this.foreignWord,
                 translation: this.translation,
-                group_id: this.group
+                group_id: this.group,
             };
             const url = '/cards/' + (this.id ? 'update/' + this.id : 'add');
             this.$request(url, data, 'post').then(response => {
                 this.message = response.message;
-                this.$request('/groups/set/', {group_qty: this.group}, 'post');
+                this.updateQtyGroup(this.group).then(() => {
+                    this.$emit('save', response.options);
+                });
+
+            });
+        },
+        updateQtyGroup(group) {
+            return new Promise((resolve, reject) => {
+                const changedGroup = this.loadedGroup !== this.group;
+                const request1 = changedGroup ?
+                    this.$request('/groups/set/', {group_qty: group}, 'post'):
+                    Promise.resolve();
+                const request2 = this.loadedGroup && changedGroup ?
+                    this.$request('/groups/set/', {group_qty: this.loadedGroup}, 'post'):
+                    Promise.resolve();
+                Promise.all([request1, request2]).then(() => {
+                    changedGroup ?
+                        this.setGroups().then(() => {
+                            resolve();
+                        }) :
+                        resolve();
+                });
+            });
+        },
+        setGroups() {
+            return new Promise((resolve, reject) => {
+                this.$request('/groups/get/', {}, 'post').then(response => {
+                    this.reactiveGroups = response.options.groups;
+                    this.$emit('changeGroups', this.reactiveGroups);
+                    resolve();
+                });
             });
         },
         clearMessage() {

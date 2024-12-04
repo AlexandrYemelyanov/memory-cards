@@ -8,7 +8,7 @@
     <form @submit.prevent="importCSV" class="g-3">
         <div class="row justify-content-center flex-wrap">
             <div class="col-auto col-xs-12">
-                <label for="csvFile" class="btn btn-outline-info me-3">
+                <label for="csvFile" class="btn btn-outline-info me-3 mb-3">
                     <i class="bi bi-file-earmark-arrow-up"></i> {{ $trans.choose_csv_file }}
                 </label>
                 <input type="file"
@@ -16,7 +16,7 @@
                        id="csvFile"
                        class="form-control-dark bg-dark desc-text"
                        accept=".csv">
-                <div v-show="selectedFile" class="text-light w-100 text-center">
+                <div v-show="selectedFile" class="text-light w-100 text-center mb-3">
                     {{ $trans.choosed_file }}: {{ selectedFile.name }}
                 </div>
             </div>

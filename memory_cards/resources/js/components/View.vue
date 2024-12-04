@@ -2,7 +2,7 @@
     <div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <SelectGroup :current-group="group" :groups="groups" @change="changeGroup" />
+                <SelectGroup v-model="group" :groups="reactiveGroups" />
             </div>
         </div>
 
@@ -15,10 +15,10 @@
 
         <div v-if="cards.length" class="mb-3 row">
             <div class="col">
-                <div class="card card-body text-center text-light text-lowercase"
+                <div class="card card-body text-light text-lowercase  d-flex align-items-center justify-content-center"
                      @click="flipCard"
                      :style="{ backgroundColor: card.color }">
-                    <h1 class="fs-1">{{ cardTitle }}</h1>
+                    <h1 class="text-center">{{ cardTitle }}</h1>
                 </div>
             </div>
         </div>
@@ -26,8 +26,9 @@
         <memory-card-create v-if="cards.length && Object.keys(card).length"
                             v-show="showEdit"
                             :card="card"
-                            :groups="groups"
+                            :groups="reactiveGroups"
                             @save="changeDataCard"
+                            @change-groups="changeGroups"
         />
 
         <div v-if="cards.length" class="row">
@@ -54,6 +55,7 @@
 <script>
 import SelectGroup from './SelectGroup.vue';
 import CardActionMenu from './ActionMenu.vue';
+import newGroup from "./NewGroup.vue";
 
 export default {
     components: {
@@ -65,6 +67,7 @@ export default {
             cnt: -1,
             currentIndex: -1,
             group: this.currentGroup || 0,
+            reactiveGroups: this.groups,
             card: {},
             voice: '',
             showFront: true,
@@ -75,15 +78,20 @@ export default {
     mounted() {
         this.cards.length && this.loadCard() && this.voiceLoad();
     },
+    watch: {
+        group(newGroup) {
+            this.$request('/groups/set/', {group_app: newGroup}, 'post').
+            then(()=>{ location.reload(); });
+        },
+    },
     computed: {
         cardTitle() {
             return this.showFront ? this.card.foreign_word : this.card.translation;
         }
     },
     methods: {
-        changeGroup(group) {
-            this.$request('/groups/set/', {group_app: group}, 'post').
-            then(()=>{ location.reload(); });
+        changeGroups(groups) {
+            this.reactiveGroups = groups;
         },
         flipCard() {
             if (!this.showFront) {
@@ -113,8 +121,17 @@ export default {
             this.showEdit = !this.showEdit;
         },
         removeCard() {
-            this.$request('/cards/remove/' + this.card.id);
-            this.$request('/groups/set/', {group_qty: this.card.group_id}, 'post');
+            this.$request('/cards/remove/' + this.card.id).then(() => {
+                this.$request('/groups/set/', {group_qty: this.card.group_id}, 'post').then(() => {
+                    this.$request('/groups/get/', {}, 'post').then(response => {
+                        this.reactiveGroups = response.options.groups;
+                    });
+                });
+            });
+
+            this.removeCardFromCards();
+        },
+        removeCardFromCards() {
             this.cards.splice(this.currentIndex, 1);
             this.nextCard();
         },
@@ -126,6 +143,10 @@ export default {
         },
         changeDataCard(card) {
             this.card = card;
+            if (card.group_id !== this.currentGroup) {
+                this.removeCardFromCards();
+                return false;
+            }
             this.cards[this.currentIndex] = card;
         },
         voiceLoad() {

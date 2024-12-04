@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Middleware;
 
+use App\Helpers\AppLangHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\App;
-use App\Http\Helpers\UiLangHelper;
 
-class UiLocaleMiddleware
+class AppLocaleMiddleware
 {
     /**
      * Handle an incoming request.
@@ -17,7 +16,7 @@ class UiLocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        App::setLocale(UiLangHelper::getLocale($request));
+        AppLangHelper::setLocale($request);
 
         return $next($request);
     }

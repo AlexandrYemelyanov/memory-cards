@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 class LangsRequest extends AppRequest
 {
-    public function rules()
+    public function rules(): array
     {
         return [
             'loc' => 'required|string',
@@ -12,7 +12,7 @@ class LangsRequest extends AppRequest
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'loc.required' => 'Locale is required',

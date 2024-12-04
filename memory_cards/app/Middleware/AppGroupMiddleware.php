@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Middleware;
 
-use App\Http\Helpers\GroupsHelper;
+use App\Helpers\GroupsHelper;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 class AppGroupMiddleware

@@ -2,41 +2,49 @@
 
 namespace App\Models;
 
-use App\Http\Helpers\AppLangHelper;
+use App\Helpers\AppLangHelper;
+use App\Scopes\UserScope;
+use App\Traits\SerializeData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class Groups extends Model
 {
-    protected $fillable = ['name', 'lang_id', 'qty'];
-
+    use SerializeData;
     use HasFactory;
 
+    protected $fillable = ['name', 'lang_id', 'user_id', 'qty'];
+
+    /**
+     * Boot the model and add global scopes and event listeners.
+     *
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
 
+        static::addGlobalScope(new UserScope());
+
         static::creating(function ($group) {
-            $group->user_id = Auth::id();
-            $group->lang_id = AppLangHelper::getId();
+            if (empty($group->user_id)) {
+                $group->user_id = Auth::id();
+            }
+            if (empty($group->lang_id)) {
+                $group->lang_id = AppLangHelper::getId();
+            }
         });
     }
 
-    public static function groupExist(int $group_id)
-    {
-        return self::where('id', $group_id)->exists();
-    }
-
+    /**
+     * Get all groups by language ID.
+     *
+     * @param int $lang_id
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public static function getAll($lang_id)
     {
         return self::where('lang_id', $lang_id)->orderBy('name', 'asc')->get();
-    }
-
-    public static function destroyByLang(int $lang_id)
-    {
-        $group_ids = self::where('lang_id', $lang_id)->pluck('id')->toArray();
-        self::whereIn('id', $group_ids)->delete();
-        return $group_ids;
     }
 }

@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LangsRequest;
 use App\Models\Langs;
-use App\Models\MemoryCard;
-use App\Models\Groups;
-use App\Models\User;
 use App\Services\Contracts\TranslatorInterface;
 use App\Services\TranslatorFactory;
-use Illuminate\Http\Request;
-use App\Http\Helpers\UiLangHelper as Lang;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class LangsController extends AppController
 {
@@ -24,7 +20,7 @@ class LangsController extends AppController
         $this->model = $model;
         $this->request = $request;
     }
-    public function index(): mixed
+    public function index(): View
     {
         $data = [
             'langs' => Langs::getAll()->toArray(),

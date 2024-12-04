@@ -23,6 +23,8 @@ return [
     'import_file_desc' => 'Nahrajte CSV soubor s kartami. První sloupec - cizí slovo, druhý - překlad',
     'choice_file' => 'Vyberte soubor',
     'name_new_group' => 'Název nové skupiny',
+    'import_csv' => 'Import CSV',
+    'card_create' => 'Vytvoření karty',
     'card_saved' => 'Karta uložena',
     'card_updated' => 'Karta aktualizována',
     'imported_qty_cards' => 'Importováno %d karet',

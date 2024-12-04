@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 class CardRequest extends AppRequest
 {
-    public function rules()
+    public function rules(): array
     {
         return [
             'foreign_word' => 'required|string',
@@ -13,7 +13,7 @@ class CardRequest extends AppRequest
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'foreign_word.required' => 'foreign_word is required',

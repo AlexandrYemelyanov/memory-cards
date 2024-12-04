@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Scopes\UserScope;
+use App\Traits\SerializeData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class MemoryCard extends Model
 {
     use HasFactory;
+    use SerializeData;
 
     protected $fillable = [
         'foreign_word',
@@ -16,9 +19,16 @@ class MemoryCard extends Model
         'group_id'
     ];
 
+    /**
+     * Boot the model and apply global scope.
+     *
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
+
+        static::addGlobalScope(new UserScope());
 
         static::creating(function ($card) {
             $card->color = self::generateRandomColor();
@@ -26,6 +36,11 @@ class MemoryCard extends Model
         });
     }
 
+    /**
+     * Generate a random color in HEX format.
+     *
+     * @return string
+     */
     public static function generateRandomColor()
     {
         $minBrightness = 0x33;
@@ -38,39 +53,14 @@ class MemoryCard extends Model
         return sprintf('#%02X%02X%02X', $red, $green, $blue);
     }
 
-    public static function cardExist(int $card_id)
-    {
-        return self::where('id', $card_id)->exists();
-    }
-
-    public static function removeGroup(int $group_id)
-    {
-        return self::where('group_id', $group_id)->update(['group_id' => null]);
-    }
-
+    /**
+     * Retrieve memory cards by their group.
+     *
+     * @param int $group_id
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public function getCardsByGroup(int $group_id)
     {
         return self::where('group_id', $group_id)->orderByRaw('RAND()')->get();
-    }
-
-    public static function getCountCardsByGroup(int $group_id)
-    {
-        return self::where('group_id', $group_id)->count();
-    }
-
-    public static function getFirstGroup()
-    {
-        $first = self::first();
-        return empty($first['group_id']) ? 0 : $first['group_id'];
-    }
-
-    public static function getCurrentGroup(int $group_id)
-    {
-        return self::getCountCardsByGroup($group_id) ? $group_id : self::getFirstGroup();
-    }
-
-    public static function removeByGroup(array $group_ids)
-    {
-        self::whereIn('group_id', $group_ids)->delete();
     }
 }

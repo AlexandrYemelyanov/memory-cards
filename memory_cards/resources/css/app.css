@@ -8,6 +8,12 @@
 .card {
     background-color: transparent;
 }
+.card-body {
+    height: 200px;
+}
+.card-body h1{
+    font-size: 36px !important;
+}
 .form-control::placeholder, .desc-text {
     color: rgba(255, 255, 255, 0.25);
 }
