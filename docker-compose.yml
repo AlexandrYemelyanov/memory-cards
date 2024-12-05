@@ -1,6 +1,8 @@
 services:
   app:
-    build: ./docker
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
     image: php:8.3.12-fpm
     container_name: php_app
     working_dir: /var/www

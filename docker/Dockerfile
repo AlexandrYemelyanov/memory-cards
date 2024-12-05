@@ -14,7 +14,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-COPY ./memory_cards /var/www
+COPY ../memory_cards /var/www
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
