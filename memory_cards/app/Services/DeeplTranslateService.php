@@ -12,7 +12,7 @@ class DeeplTranslateService implements TranslatorInterface
 
     public function __construct()
     {
-        $auth_key = env('DEEPL_API_KEY');
+        $auth_key = env('TRANSLATE_API_KEY');
         $this->translator = new Translator($auth_key);
 
     }
