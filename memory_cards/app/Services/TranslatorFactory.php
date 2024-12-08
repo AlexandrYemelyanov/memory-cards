@@ -12,13 +12,14 @@ class TranslatorFactory
     {
         $this->translators = [
             'deepl' => DeeplTranslateService::class,
+            '' => EmptyTranslateService::class
         ];
     }
 
     public function make(string $service = ''): TranslatorInterface
     {
         if (empty($service)) {
-            $service = env('TRANSLATE_SERVICE', 'deepl');
+            $service = env('TRANSLATE_SERVICE');
         }
         if (!isset($this->translators[$service])) {
             throw new \InvalidArgumentException("The $service is not supported.");

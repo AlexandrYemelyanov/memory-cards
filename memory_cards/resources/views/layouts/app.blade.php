@@ -18,7 +18,6 @@
 </head>
 <body style="background-color: rgb(33, 37, 41)" class="bg-dark">
 <div class="container mt-4">
-    <h1>--{{ $locale }}--</h1>
     <div id="app" data-trans='{{ json_encode(trans('messages')) }}'>
         <memory-card-menu
             :locale="'{{ $locale }}'"
