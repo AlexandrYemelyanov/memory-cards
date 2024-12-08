@@ -19,8 +19,9 @@ class TranslatorFactory
     public function make(string $service = ''): TranslatorInterface
     {
         if (empty($service)) {
-            $service = env('TRANSLATE_SERVICE');
+            $service = env('TRANSLATE_SERVICE', '');
         }
+
         if (!isset($this->translators[$service])) {
             throw new \InvalidArgumentException("The $service is not supported.");
         }
