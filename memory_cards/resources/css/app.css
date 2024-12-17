@@ -47,3 +47,7 @@
     --bs-spinner-width: 1rem!important;
     --bs-spinner-height: 1rem!important;
 }
+select option {
+    background-color: rgb(33, 37, 41);
+    color: #ffffff;
+}

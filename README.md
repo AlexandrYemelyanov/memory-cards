@@ -280,7 +280,7 @@ Git (опционально)
    ```
 7. Запуск Vite:
    ```bash
-   docker exec php_app npm run dev
+   docker exec php_app npm run build
    ``` 
 8. По адресу http://localhost должно открыться приложение   
 ## License
